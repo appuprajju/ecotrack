@@ -69,15 +69,15 @@ jobs:
 
       - name: Build and Push Docker Images
         run: |
-          docker build -t us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ecotrack/ecotrack-backend:${{ github.sha }} ./backend
-          docker build -t us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ecotrack/ecotrack-frontend:${{ github.sha }} ./frontend
-          docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ecotrack/ecotrack-backend:${{ github.sha }}
-          docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ecotrack/ecotrack-frontend:${{ github.sha }}
+          docker build -t us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ecotrack-repo/ecotrack-backend:${{ github.sha }} ./backend
+          docker build -t us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ecotrack-repo/ecotrack-frontend:${{ github.sha }} ./frontend
+          docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ecotrack-repo/ecotrack-backend:${{ github.sha }}
+          docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ecotrack-repo/ecotrack-frontend:${{ github.sha }}
 
       - name: Deploy Backend to Cloud Run
         run: |
           gcloud run deploy ecotrack-backend \
-            --image=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ecotrack/ecotrack-backend:${{ github.sha }} \
+            --image=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ecotrack-repo/ecotrack-backend:${{ github.sha }} \
             --region=us-central1 \
             --platform=managed \
             --allow-unauthenticated \
@@ -86,7 +86,7 @@ jobs:
       - name: Deploy Frontend to Cloud Run
         run: |
           gcloud run deploy ecotrack-frontend \
-            --image=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ecotrack/ecotrack-frontend:${{ github.sha }} \
+            --image=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ecotrack-repo/ecotrack-frontend:${{ github.sha }} \
             --region=us-central1 \
             --platform=managed \
             --allow-unauthenticated
