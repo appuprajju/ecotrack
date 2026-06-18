@@ -90,3 +90,9 @@ jobs:
             --region=us-central1 \
             --platform=managed \
             --allow-unauthenticated
+            
+      - name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/868749970271/locations/us-central1/workloadIdentityPools/Github pool/providers/Github provider'
+          service_account: 'eco-deployer@ecotrack-499112.iam.gserviceaccount.com'
