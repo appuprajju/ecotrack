@@ -16,7 +16,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-size: 20
+          node-version: 20
           cache: 'npm'
           cache-dependency-path: './backend/package-lock.json'
 
@@ -87,4 +87,4 @@ jobs:
             --image=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ecotrack-repo/ecotrack-frontend:${{ github.sha }} \
             --region=us-central1 \
             --platform=managed \
-            
+            --allow-unauthenticated
