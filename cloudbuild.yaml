@@ -1,0 +1,72 @@
+steps:
+  # 1. Build and tag backend image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - '$_GCP_REGION-docker.pkg.dev/$PROJECT_ID/$_REGISTRY_NAME/ecotrack-backend:$COMMIT_SHA'
+      - './backend'
+    id: 'build-backend'
+
+  # 2. Build and tag frontend image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - '$_GCP_REGION-docker.pkg.dev/$PROJECT_ID/$_REGISTRY_NAME/ecotrack-frontend:$COMMIT_SHA'
+      - './frontend'
+    id: 'build-frontend'
+
+  # 3. Push images to GCP Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '$_GCP_REGION-docker.pkg.dev/$PROJECT_ID/$_REGISTRY_NAME/ecotrack-backend:$COMMIT_SHA'
+    id: 'push-backend'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '$_GCP_REGION-docker.pkg.dev/$PROJECT_ID/$_REGISTRY_NAME/ecotrack-frontend:$COMMIT_SHA'
+    id: 'push-frontend'
+
+  # 4. Deploy Backend to Google Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'ecotrack-backend'
+      - '--image=$_GCP_REGION-docker.pkg.dev/$PROJECT_ID/$_REGISTRY_NAME/ecotrack-backend:$COMMIT_SHA'
+      - '--region=$_GCP_REGION'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--update-env-vars=NODE_ENV=production,DATABASE_URL=$_DATABASE_URL'
+    id: 'deploy-backend'
+
+  # 5. Deploy Frontend to Google Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: bash
+    args:
+      - '-c'
+      - |
+        BACKEND_URL=$$(gcloud run services describe ecotrack-backend --region=$_GCP_REGION --format="value(status.url)")
+        gcloud run deploy ecotrack-frontend \
+          --image=$_GCP_REGION-docker.pkg.dev/$PROJECT_ID/$_REGISTRY_NAME/ecotrack-frontend:$COMMIT_SHA \
+          --region=$_GCP_REGION \
+          --platform=managed \
+          --allow-unauthenticated \
+          --update-env-vars=BACKEND_URL=$$BACKEND_URL
+    id: 'deploy-frontend'
+
+images:
+  - '$_GCP_REGION-docker.pkg.dev/$PROJECT_ID/$_REGISTRY_NAME/ecotrack-backend:$COMMIT_SHA'
+  - '$_GCP_REGION-docker.pkg.dev/$PROJECT_ID/$_REGISTRY_NAME/ecotrack-frontend:$COMMIT_SHA'
+
+substitutions:
+  _GCP_REGION: 'us-central1'
+  _REGISTRY_NAME: 'ecotrack-repo'
+  _DATABASE_URL: 'postgresql://ecouser:ecopassword123!@localhost:5432/ecotrackdb'
+
+options:
+  logging: CLOUD_LOGGING_ONLY

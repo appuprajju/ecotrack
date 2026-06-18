@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: ecotrack-db
+    environment:
+      POSTGRES_USER: ecouser
+      POSTGRES_PASSWORD: ecopassword123!
+      POSTGRES_DB: ecotrackdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - ecotrack-net
+
+  redis-cache:
+    image: redis:7-alpine
+    container_name: ecotrack-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - ecotrack-net
+
+  backend-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ecotrack-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - DATABASE_URL=postgresql://ecouser:ecopassword123!@postgres-db:5432/ecotrackdb?schema=public
+      - PORT=5000
+      - NODE_ENV=development
+      - JWT_ACCESS_SECRET=eco_track_access_secret_key_987654321
+      - JWT_REFRESH_SECRET=eco_track_refresh_secret_key_123456789
+      - REDIS_URL=redis://redis-cache:6379
+    depends_on:
+      - postgres-db
+      - redis-cache
+    networks:
+      - ecotrack-net
+
+  frontend-service:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ecotrack-frontend
+    ports:
+      - "3000:80"
+    environment:
+      - BACKEND_URL=http://backend-service:5000
+    depends_on:
+      - backend-service
+    networks:
+      - ecotrack-net
+
+volumes:
+  pgdata:
+
+networks:
+  ecotrack-net:
+    driver: bridge

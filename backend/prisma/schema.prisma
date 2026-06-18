@@ -1,0 +1,171 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum GoalStatus {
+  ACTIVE
+  COMPLETED
+  FAILED
+}
+
+enum ChallengeStatus {
+  JOINED
+  COMPLETED
+}
+
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  passwordHash String
+  role         Role          @default(USER)
+  firstName    String
+  lastName     String
+  country      String        @default("Global")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  tokens       RefreshToken[]
+  carbonLogs   CarbonLog[]
+  goals        Goal[]
+  challenges   UserChallenge[]
+  notifications Notification[]
+  auditLogs    AuditLog[]
+
+  @@index([email])
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String    @unique
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  revokedAt DateTime?
+
+  @@index([userId])
+  @@index([token])
+}
+
+model CarbonLog {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category        String   // transportation, energy, food, waste, water
+  subCategory     String   // car, bus, flights, electricity, vegetarian, plastic, etc.
+  value           Float    // Distance, energy consumption, weight, volume
+  unit            String   // km, kWh, kg, liters, etc.
+  co2EquivalentKg Float    // Pre-calculated footprint based on emission factors
+  loggedAt        DateTime @default(now())
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
+  @@index([userId, category])
+  @@index([loggedAt])
+}
+
+model EmissionFactor {
+  id          String   @id @default(uuid())
+  category    String   // transportation, energy, food, waste, water
+  subCategory String   @unique // e.g. car, bus, metro, flight, electricity, vegan, non_veg
+  factor      Float    // kg CO2 per unit
+  unit        String   // km, kWh, meal, kg, liter
+  source      String   @default("IPCC Standard")
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+}
+
+model Goal {
+  id          String     @id @default(uuid())
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  category    String     // transportation, energy, food, waste, water, total
+  targetCo2Kg Float      // Target footprint threshold (or amount to reduce)
+  startDate   DateTime
+  endDate     DateTime
+  status      GoalStatus @default(ACTIVE)
+  createdAt   DateTime   @default(now())
+
+  @@index([userId])
+  @@index([userId, status])
+}
+
+model Challenge {
+  id              String          @id @default(uuid())
+  title           String
+  description     String
+  category        String
+  co2SavingsEstKg Float
+  points          Int
+  startDate       DateTime
+  endDate         DateTime
+  createdAt       DateTime        @default(now())
+  users           UserChallenge[]
+
+  @@index([startDate, endDate])
+}
+
+model UserChallenge {
+  id          String          @id @default(uuid())
+  userId      String
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challengeId String
+  challenge   Challenge       @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  status      ChallengeStatus @default(JOINED)
+  joinedAt    DateTime        @default(now())
+  completedAt DateTime?
+
+  @@unique([userId, challengeId])
+  @@index([userId])
+  @@index([challengeId])
+}
+
+model LearningContent {
+  id          String   @id @default(uuid())
+  title       String
+  contentType String   // article, guide, video
+  content     String   // Markdown body text or external video URL
+  category    String   // e.g. general, transportation, energy, consumption
+  authorName  String   @default("EcoTrack Expert")
+  createdAt   DateTime @default(now())
+
+  @@index([category])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  type      String   // info, challenge, goal, alert
+  createdAt DateTime @default(now())
+
+  @@index([userId, read])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String   // USER_LOGIN, EMISSION_FACTOR_CHANGE, AUDIT_EXPORT, etc.
+  ipAddress String?
+  userAgent String?
+  details   String?  // JSON formatted details of the action
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}

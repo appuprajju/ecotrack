@@ -1,0 +1,15 @@
+{
+  "name": "ecotrack-platform",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:backend": "npm run dev --prefix backend",
+    "install:frontend": "npm install --prefix frontend",
+    "install:backend": "npm install --prefix backend",
+    "install:all": "npm install && npm run install:frontend && npm run install:backend"
+  },
+  "dependencies": {
+    "npm": "^11.17.0"
+  }
+}
