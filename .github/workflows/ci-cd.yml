@@ -82,12 +82,17 @@ jobs:
 
       - name: Deploy Backend to Cloud Run
         run: |
+          SECRETS_JSON=$(gcloud secrets versions access latest --secret="ecotrack-secrets")
+          DATABASE_URL=$(echo "$SECRETS_JSON" | jq -r '.DATABASE_URL')
+          JWT_ACCESS_SECRET=$(echo "$SECRETS_JSON" | jq -r '.JWT_ACCESS_SECRET')
+          JWT_REFRESH_SECRET=$(echo "$SECRETS_JSON" | jq -r '.JWT_REFRESH_SECRET')
+          
           gcloud run deploy ecotrack-backend \
             --image=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ecotrack-repo/ecotrack-backend:${{ github.sha }} \
             --region=us-central1 \
             --platform=managed \
             --allow-unauthenticated \
-            --update-env-vars=NODE_ENV=production
+            --update-env-vars=NODE_ENV=production,DATABASE_URL="$DATABASE_URL",JWT_ACCESS_SECRET="$JWT_ACCESS_SECRET",JWT_REFRESH_SECRET="$JWT_REFRESH_SECRET"
 
       - name: Deploy Frontend to Cloud Run
         run: |
