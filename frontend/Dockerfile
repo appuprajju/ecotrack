@@ -16,6 +16,7 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 8080
 ENV PORT=8080
+ENV BACKEND_URL=http://localhost:5000
 # Limit envsubst to only replace BACKEND_URL and PORT to avoid breaking Nginx internal variables
 ENV NGINX_ENVSUBST_FILTER="BACKEND_URL|PORT"
 

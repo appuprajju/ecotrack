@@ -85,11 +85,13 @@ jobs:
 
       - name: Deploy Frontend to Cloud Run
         run: |
+          BACKEND_URL=$(gcloud run services describe ecotrack-backend --region=us-central1 --format="value(status.url)")
           gcloud run deploy ecotrack-frontend \
             --image=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ecotrack-repo/ecotrack-frontend:${{ github.sha }} \
             --region=us-central1 \
             --platform=managed \
-            --allow-unauthenticated
+            --allow-unauthenticated \
+            --update-env-vars=BACKEND_URL=$BACKEND_URL
 
       - name: Authenticate with Google Cloud
         uses: google-github-actions/auth@v2
