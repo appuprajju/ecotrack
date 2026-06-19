@@ -51,6 +51,9 @@ jobs:
     needs: test-and-verify
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
