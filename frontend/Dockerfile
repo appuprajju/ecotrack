@@ -15,12 +15,13 @@ FROM nginx
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 8080
-# Limit envsubst to only replace BACKEND_URL to avoid breaking Nginx internal variables
-ENV NGINX_ENVSUBST_FILTER=BACKEND_URL
+ENV PORT=8080
+# Limit envsubst to only replace BACKEND_URL and PORT to avoid breaking Nginx internal variables
+ENV NGINX_ENVSUBST_FILTER="BACKEND_URL|PORT"
 
 # Custom nginx config to redirect API calls and handle React SPA routing
 RUN mkdir -p /etc/nginx/templates && echo 'server { \
-    listen 80; \
+    listen ${PORT}; \
     location / { \
     root /usr/share/nginx/html; \
     index index.html index.htm; \
