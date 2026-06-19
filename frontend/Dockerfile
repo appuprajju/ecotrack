@@ -36,7 +36,6 @@ RUN mkdir -p /etc/nginx/templates && echo 'server { \
     } \
     }' > /etc/nginx/templates/default.conf.template
 
-EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
 
