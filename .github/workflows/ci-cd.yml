@@ -58,6 +58,12 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+         workload_identity_provider: ${{secrets.WIF_PROVIDER}}
+         service_account: eco-deployer@ecotrack-499112.iam.gserviceaccount.com
+
       - name: Setup Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
@@ -90,3 +96,7 @@ jobs:
             --platform=managed \
             --allow-unauthenticated \
             --update-env-vars=BACKEND_URL=$BACKEND_URL
+      - name: Verify Google Authentication 
+        run: |
+         gcloud auth list 
+         gcloud config list project
