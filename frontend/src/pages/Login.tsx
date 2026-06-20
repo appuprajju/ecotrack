@@ -11,11 +11,14 @@ export const LoginPage: React.FC = () => {
   const [country, setCountry] = useState<string>('United States');
   const [error, setError] = useState<string>('');
   const [message, setMessage] = useState<string>('');
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setMessage('');
+    setIsLoading(true);
 
     try {
       if (isLogin) {
@@ -29,6 +32,8 @@ export const LoginPage: React.FC = () => {
       }
     } catch (err: any) {
       setError(err.message || 'An error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -128,6 +133,12 @@ export const LoginPage: React.FC = () => {
           )}
 
           <form onSubmit={handleSubmit}>
+            <style>{`
+              @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+              }
+            `}</style>
             {!isLogin && (
               <div style={{ display: 'flex', gap: '12px' }}>
                 <div className="form-group" style={{ flex: 1 }}>
@@ -138,6 +149,7 @@ export const LoginPage: React.FC = () => {
                     className="form-control"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
+                    disabled={isLoading}
                   />
                 </div>
                 <div className="form-group" style={{ flex: 1 }}>
@@ -148,6 +160,7 @@ export const LoginPage: React.FC = () => {
                     className="form-control"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -162,19 +175,52 @@ export const LoginPage: React.FC = () => {
                 placeholder="e.g. name@domain.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={isLoading}
               />
             </div>
 
             <div className="form-group">
               <label className="form-label">Password</label>
-              <input
-                type="password"
-                required
-                className="form-control"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  className="form-control"
+                  placeholder="••••••••"
+                  style={{ paddingRight: '45px' }}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: 'absolute',
+                    right: '12px',
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--text-muted)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '4px',
+                    zIndex: 10
+                  }}
+                >
+                  {showPassword ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                      <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
 
             {!isLogin && (
@@ -184,6 +230,7 @@ export const LoginPage: React.FC = () => {
                   className="form-control"
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
+                  disabled={isLoading}
                 >
                   <option value="United States">United States</option>
                   <option value="Canada">Canada</option>
@@ -196,8 +243,22 @@ export const LoginPage: React.FC = () => {
               </div>
             )}
 
-            <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '10px' }}>
-              {isLogin ? 'Sign In to Account' : 'Create Free Account'}
+            <button 
+              type="submit" 
+              className="btn btn-primary" 
+              style={{ width: '100%', marginTop: '10px', opacity: isLoading ? 0.75 : 1 }}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <svg className="spinner" viewBox="0 0 50 50" style={{ width: '16px', height: '16px', animation: 'spin 1s linear infinite' }}>
+                    <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" style={{ strokeDasharray: '45, 150', strokeDashoffset: 0 }}></circle>
+                  </svg>
+                  <span>{isLogin ? 'Signing In...' : 'Registering...'}</span>
+                </div>
+              ) : (
+                <span>{isLogin ? 'Sign In to Account' : 'Create Free Account'}</span>
+              )}
             </button>
           </form>
 
