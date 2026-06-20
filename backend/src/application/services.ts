@@ -101,7 +101,7 @@ export class ApplicationAuthService {
     const accessToken = jwt.sign(
       { userId: user.id, role: user.role, email: user.email },
       JWT_ACCESS_SECRET,
-      { expiresIn: '15m' }
+      { expiresIn: '7d' }
     );
 
     const refreshToken = jwt.sign(

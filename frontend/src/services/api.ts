@@ -24,8 +24,9 @@ export class ApiService {
     const response = await fetch(`${API_BASE}${endpoint}`, config);
     
     if (response.status === 401 || response.status === 403) {
-      // Clear local auth token if unauthorized
+      // Clear local auth token if unauthorized and redirect to login via reload
       localStorage.removeItem('eco_token');
+      window.location.reload();
     }
 
     const data = await response.json();
