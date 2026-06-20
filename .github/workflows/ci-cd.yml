@@ -87,13 +87,39 @@ jobs:
           JWT_ACCESS_SECRET=$(echo "$SECRETS_JSON" | jq -r '.JWT_ACCESS_SECRET')
           JWT_REFRESH_SECRET=$(echo "$SECRETS_JSON" | jq -r '.JWT_REFRESH_SECRET')
           
+          # Auto-correct Supabase pooler username if it is missing the project reference
+          if [[ "$DATABASE_URL" == *"pooler.supabase.com"* ]]; then
+            if [[ "$DATABASE_URL" == *"//postgres:"* ]]; then
+              echo "Correcting direct postgres username for Supabase pooler connection..."
+              DATABASE_URL=$(echo "$DATABASE_URL" | sed 's/\/\/postgres:/\/\/postgres.jegtsqieyebkktqudide:/')
+            elif [[ "$DATABASE_URL" == *"//postgres.:"* ]]; then
+              echo "Correcting incomplete postgres. username for Supabase pooler connection..."
+              DATABASE_URL=$(echo "$DATABASE_URL" | sed 's/\/\/postgres\.:/\/\/postgres.jegtsqieyebkktqudide:/')
+            fi
+          fi
+          
+          # Mask and print the database connection url safely for debugging
+          SAFE_URL=$(echo "$DATABASE_URL" | sed -E 's/:[^@:]*@/:****@/g')
+          echo "================ DB CONNECTION INFO ================"
+          echo "Connecting using DATABASE_URL: $SAFE_URL"
+          echo "===================================================="
+          
+          # Conditionally add Cloud SQL instances flag if host=/cloudsql/ parameter is present in URL
+          SQL_FLAG=""
+          if [[ "$DATABASE_URL" == *"host=/cloudsql/"* ]]; then
+            SQL_FLAG="--add-cloudsql-instances=${{ secrets.GCP_PROJECT_ID }}:us-central1:ecotrack-db"
+            echo "Cloud SQL connection detected. Attaching SQL instance proxy."
+          else
+            echo "Direct connection (Supabase/TCP) detected. Skipping Cloud SQL proxy attachment."
+          fi
+          
           gcloud run deploy ecotrack-backend \
             --image=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ecotrack-repo/ecotrack-backend:${{ github.sha }} \
             --region=us-central1 \
             --platform=managed \
             --allow-unauthenticated \
             --port=8080 \
-            --add-cloudsql-instances=${{ secrets.GCP_PROJECT_ID }}:us-central1:ecotrack-db \
+            $SQL_FLAG \
             --update-env-vars=NODE_ENV=production,DATABASE_URL="$DATABASE_URL",JWT_ACCESS_SECRET="$JWT_ACCESS_SECRET",JWT_REFRESH_SECRET="$JWT_REFRESH_SECRET"
 
       - name: Deploy Frontend to Cloud Run
