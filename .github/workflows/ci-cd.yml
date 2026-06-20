@@ -92,7 +92,8 @@ jobs:
             --region=us-central1 \
             --platform=managed \
             --allow-unauthenticated \
-            --port=8080\
+            --port=8080 \
+            --add-cloudsql-instances=${{ secrets.GCP_PROJECT_ID }}:us-central1:ecotrack-db \
             --update-env-vars=NODE_ENV=production,DATABASE_URL="$DATABASE_URL",JWT_ACCESS_SECRET="$JWT_ACCESS_SECRET",JWT_REFRESH_SECRET="$JWT_REFRESH_SECRET"
 
       - name: Deploy Frontend to Cloud Run
