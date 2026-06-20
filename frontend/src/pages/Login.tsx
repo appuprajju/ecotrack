@@ -142,8 +142,9 @@ export const LoginPage: React.FC = () => {
             {!isLogin && (
               <div style={{ display: 'flex', gap: '12px' }}>
                 <div className="form-group" style={{ flex: 1 }}>
-                  <label className="form-label">First Name</label>
+                  <label htmlFor="first-name" className="form-label">First Name</label>
                   <input
+                    id="first-name"
                     type="text"
                     required
                     className="form-control"
@@ -153,8 +154,9 @@ export const LoginPage: React.FC = () => {
                   />
                 </div>
                 <div className="form-group" style={{ flex: 1 }}>
-                  <label className="form-label">Last Name</label>
+                  <label htmlFor="last-name" className="form-label">Last Name</label>
                   <input
+                    id="last-name"
                     type="text"
                     required
                     className="form-control"
@@ -167,8 +169,9 @@ export const LoginPage: React.FC = () => {
             )}
 
             <div className="form-group">
-              <label className="form-label">Email Address</label>
+              <label htmlFor="email-address" className="form-label">Email Address</label>
               <input
+                id="email-address"
                 type="email"
                 required
                 className="form-control"
@@ -180,9 +183,10 @@ export const LoginPage: React.FC = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Password</label>
+              <label htmlFor="password" className="form-label">Password</label>
               <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                 <input
+                  id="password"
                   type={showPassword ? 'text' : 'password'}
                   required
                   className="form-control"
@@ -194,6 +198,7 @@ export const LoginPage: React.FC = () => {
                 />
                 <button
                   type="button"
+                  aria-label="Toggle password visibility"
                   onClick={() => setShowPassword(!showPassword)}
                   style={{
                     position: 'absolute',
@@ -225,8 +230,9 @@ export const LoginPage: React.FC = () => {
 
             {!isLogin && (
               <div className="form-group">
-                <label className="form-label">Region / Country</label>
+                <label htmlFor="region-country" className="form-label">Region / Country</label>
                 <select
+                  id="region-country"
                   className="form-control"
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}

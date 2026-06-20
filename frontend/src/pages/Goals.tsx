@@ -115,8 +115,9 @@ export const GoalsTracker: React.FC = () => {
 
           <form onSubmit={handleCreateGoal}>
             <div className="form-group">
-              <label className="form-label">Goal Title</label>
+              <label htmlFor="goal-title" className="form-label">Goal Title</label>
               <input
+                id="goal-title"
                 type="text"
                 required
                 className="form-control"
@@ -127,8 +128,9 @@ export const GoalsTracker: React.FC = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Target Category</label>
+              <label htmlFor="goal-category" className="form-label">Target Category</label>
               <select
+                id="goal-category"
                 className="form-control"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
@@ -142,8 +144,9 @@ export const GoalsTracker: React.FC = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">CO₂ Limit Threshold (kg)</label>
+              <label htmlFor="goal-threshold" className="form-label">CO₂ Limit Threshold (kg)</label>
               <input
+                id="goal-threshold"
                 type="number"
                 required
                 min="1"
@@ -154,8 +157,9 @@ export const GoalsTracker: React.FC = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Start Date</label>
+              <label htmlFor="goal-start-date" className="form-label">Start Date</label>
               <input
+                id="goal-start-date"
                 type="date"
                 required
                 className="form-control"
@@ -165,8 +169,9 @@ export const GoalsTracker: React.FC = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">End Date</label>
+              <label htmlFor="goal-end-date" className="form-label">End Date</label>
               <input
+                id="goal-end-date"
                 type="date"
                 required
                 className="form-control"

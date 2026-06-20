@@ -23,7 +23,7 @@ export class ApiService {
 
     const response = await fetch(`${API_BASE}${endpoint}`, config);
     
-    if (response.status === 401 || response.status === 403) {
+    if ((response.status === 401 || response.status === 403) && endpoint !== '/auth/login' && endpoint !== '/auth/register') {
       // Clear local auth token if unauthorized and redirect to login via reload
       localStorage.removeItem('eco_token');
       window.location.reload();
@@ -31,7 +31,7 @@ export class ApiService {
 
     const data = await response.json();
     if (!response.ok) {
-      throw new Error(data.error || 'API Request Failed');
+      throw new Error(data.error || data.message || 'API Request Failed');
     }
     return data;
   }

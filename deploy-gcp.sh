@@ -12,7 +12,7 @@ REGION="us-central1"
 INSTANCE_NAME="ecotrack-db"
 DB_NAME="ecotrackdb"
 DB_USER="ecouser"
-DB_PASSWORD="EcoPasswordSecure2026!"
+DB_PASSWORD="EcoPasswordSecure2026"
 REDIS_INSTANCE="ecotrack-redis"
 SECRET_NAME="ecotrack-secrets"
 REPOSITORY_NAME="ecotrack-repo"
@@ -93,7 +93,8 @@ if [ "$USE_SUPABASE" = false ]; then
   REDIS_IP=$(gcloud redis instances describe "$REDIS_INSTANCE" --region="$REGION" --format="value(host)")
   echo "Redis Instance IP: $REDIS_IP"
   REDIS_URL="redis://$REDIS_IP:6379"
-  DATABASE_URL="postgresql://$DB_USER:$DB_PASSWORD@localhost:5432/$DB_NAME?schema=public"
+  INSTANCE_CONNECTION_NAME="$PROJECT_ID:$REGION:$INSTANCE_NAME"
+  DATABASE_URL="postgresql://$DB_USER:$DB_PASSWORD@localhost/$DB_NAME?host=/cloudsql/$INSTANCE_CONNECTION_NAME"
 else
   echo "Using Supabase database. Skipping GCP Cloud SQL and Memorystore Redis provisioning."
   REDIS_URL=""
@@ -113,8 +114,14 @@ echo -n "$SECRET_JSON" | gcloud secrets versions add "$SECRET_NAME" --data-file=
 
 # 6. Build and Submit Containers
 echo "Submitting docker container images to Artifact Registry..."
+if [ "$USE_SUPABASE" = false ]; then
+  INSTANCE_CONNECTION_NAME="$PROJECT_ID:$REGION:$INSTANCE_NAME"
+else
+  INSTANCE_CONNECTION_NAME=""
+fi
+
 gcloud builds submit --config=cloudbuild.yaml \
-  --substitutions=_GCP_REGION="$REGION",_REGISTRY_NAME="$REPOSITORY_NAME",_DATABASE_URL="$DATABASE_URL"
+  --substitutions=_GCP_REGION="$REGION",_REGISTRY_NAME="$REPOSITORY_NAME",_DATABASE_URL="$DATABASE_URL",_CLOUD_SQL_INSTANCE="$INSTANCE_CONNECTION_NAME"
 
 echo "------------------------------------------------------------"
 echo "ECOTRACK AI PLATFORM HAS BEEN PROVISIONED SUCCESSFUL!"

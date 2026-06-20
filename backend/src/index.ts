@@ -14,8 +14,13 @@ const PORT = process.env.PORT || 5000;
 
 // Security and utility Middlewares
 app.use(helmet());
+
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+  ? process.env.ALLOWED_ORIGINS.split(',') 
+  : '*';
+
 app.use(cors({
-  origin: '*', // Allow all client portals in development, restrict in production
+  origin: process.env.NODE_ENV === 'production' ? allowedOrigins : '*',
   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -37,12 +42,14 @@ app.get('/health', (req, res) => {
 app.use(globalErrorHandler);
 
 // Start Application Server
-app.listen(PORT, () => {
-  console.log(`===============================================`);
-  console.log(`   EcoTrack AI Platform Backend Service        `);
-  console.log(`   Listening on port: ${PORT}                  `);
-  console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`===============================================`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`===============================================`);
+    console.log(`   EcoTrack AI Platform Backend Service        `);
+    console.log(`   Listening on port: ${PORT}                  `);
+    console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`===============================================`);
+  });
+}
 
 export default app; // For integration test suites

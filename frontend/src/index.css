@@ -707,3 +707,9 @@ p {
   box-shadow: 0 0 15px rgba(16, 185, 129, 0.08);
 }
 
+.motive-option-card:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  background: rgba(16, 185, 129, 0.04);
+}
+

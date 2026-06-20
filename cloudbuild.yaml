@@ -32,16 +32,20 @@ steps:
 
   # 4. Deploy Backend to Google Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: gcloud
+    entrypoint: bash
     args:
-      - 'run'
-      - 'deploy'
-      - 'ecotrack-backend'
-      - '--image=$_GCP_REGION-docker.pkg.dev/$PROJECT_ID/$_REGISTRY_NAME/ecotrack-backend:$COMMIT_SHA'
-      - '--region=$_GCP_REGION'
-      - '--platform=managed'
-      - '--allow-unauthenticated'
-      - '--update-env-vars=NODE_ENV=production,DATABASE_URL=$_DATABASE_URL'
+      - '-c'
+      - |
+        cmd="gcloud run deploy ecotrack-backend \
+          --image=$_GCP_REGION-docker.pkg.dev/$PROJECT_ID/$_REGISTRY_NAME/ecotrack-backend:$COMMIT_SHA \
+          --region=$_GCP_REGION \
+          --platform=managed \
+          --allow-unauthenticated \
+          --update-env-vars=NODE_ENV=production,DATABASE_URL=$_DATABASE_URL"
+        if [ -n "$_CLOUD_SQL_INSTANCE" ]; then
+          cmd="$$cmd --add-cloudsql-instances=$_CLOUD_SQL_INSTANCE"
+        fi
+        eval $$cmd
     id: 'deploy-backend'
 
   # 5. Deploy Frontend to Google Cloud Run
@@ -67,6 +71,7 @@ substitutions:
   _GCP_REGION: 'us-central1'
   _REGISTRY_NAME: 'ecotrack-repo'
   _DATABASE_URL: 'postgresql://ecouser:ecopassword123!@localhost:5432/ecotrackdb'
+  _CLOUD_SQL_INSTANCE: ''
 
 options:
   logging: CLOUD_LOGGING_ONLY

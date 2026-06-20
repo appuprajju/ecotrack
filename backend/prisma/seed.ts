@@ -117,9 +117,12 @@ async function main() {
   ];
 
   for (const c of challenges) {
-    await prisma.challenge.create({
-      data: c
-    });
+    const existing = await prisma.challenge.findFirst({ where: { title: c.title } });
+    if (!existing) {
+      await prisma.challenge.create({
+        data: c
+      });
+    }
   }
 
   console.log('Eco-Challenges seeded successfully');
@@ -153,9 +156,12 @@ async function main() {
   ];
 
   for (const item of learningMaterials) {
-    await prisma.learningContent.create({
-      data: item
-    });
+    const existing = await prisma.learningContent.findFirst({ where: { title: item.title } });
+    if (!existing) {
+      await prisma.learningContent.create({
+        data: item
+      });
+    }
   }
 
   console.log('Learning content seeded successfully');

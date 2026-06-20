@@ -229,7 +229,8 @@ export const UserDashboard: React.FC = () => {
           
           <div className="sustainability-ring">
             {/* SVG Circle Gauge */}
-            <svg width="150" height="150" viewBox="0 0 150 150">
+            <svg width="150" height="150" viewBox="0 0 150 150" role="img" aria-label={`Sustainability score gauge: ${data?.sustainabilityScore} out of 100`}>
+              <title>Sustainability score progress ring</title>
               <circle
                 cx="75"
                 cy="75"
@@ -277,13 +278,13 @@ export const UserDashboard: React.FC = () => {
               // Calculate percent height for SVG columns
               const pct = Math.max(5, (t.co2 / maxWeeklyCo2) * 100);
               return (
-                <div key={idx} className="bar-column">
+                <div key={idx} className="bar-column" role="img" aria-label={`Emissions on ${t.day}: ${t.co2.toFixed(1)} kg CO2`}>
                   <div 
                     className="bar-graphic" 
                     style={{ height: `${pct}%` }} 
                     data-value={t.co2.toFixed(1)}
                   />
-                  <span className="bar-label">{t.day}</span>
+                  <span className="bar-label" aria-hidden="true">{t.day}</span>
                 </div>
               );
             })}

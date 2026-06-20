@@ -62,11 +62,29 @@ apiRouter.post('/auth/register', asyncHandler(async (req: Request, res: Response
   if (!email || !password || !firstName || !lastName) {
     return res.status(400).json({ error: 'Missing registration details.' });
   }
-  const user = await authService.register(email, password, firstName, lastName, country);
-  return res.status(201).json({
-    message: 'User registered successfully.',
-    user: { id: user.id, email: user.email, firstName: user.firstName, role: user.role }
-  });
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ error: 'Invalid email address format.' });
+  }
+
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  if (!passwordRegex.test(password)) {
+    return res.status(400).json({ error: 'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.' });
+  }
+
+  try {
+    const user = await authService.register(email, password, firstName, lastName, country);
+    return res.status(201).json({
+      message: 'User registered successfully.',
+      user: { id: user.id, email: user.email, firstName: user.firstName, role: user.role }
+    });
+  } catch (err: any) {
+    if (err.message === 'User with this email already exists.') {
+      return res.status(409).json({ error: err.message });
+    }
+    throw err;
+  }
 }));
 
 apiRouter.post('/auth/login', asyncHandler(async (req: Request, res: Response) => {
@@ -77,11 +95,18 @@ apiRouter.post('/auth/login', asyncHandler(async (req: Request, res: Response) =
   const ip = req.ip;
   const ua = req.headers['user-agent'];
   
-  const { user, tokens } = await authService.login(email, password, ip, ua);
-  return res.status(200).json({
-    user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role, country: user.country },
-    tokens
-  });
+  try {
+    const { user, tokens } = await authService.login(email, password, ip, ua);
+    return res.status(200).json({
+      user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role, country: user.country },
+      tokens
+    });
+  } catch (err: any) {
+    if (err.message === 'Invalid email or password.') {
+      return res.status(401).json({ error: err.message });
+    }
+    throw err;
+  }
 }));
 
 apiRouter.post('/auth/refresh', asyncHandler(async (req: Request, res: Response) => {

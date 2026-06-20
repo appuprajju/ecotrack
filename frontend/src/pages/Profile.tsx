@@ -298,13 +298,22 @@ export const UserProfile: React.FC = () => {
           )}
         </p>
 
-        <div className="motive-selection-grid">
+        <div className="motive-selection-grid" role="radiogroup" aria-label="Select climate focus motive">
           {motives.map((m) => {
             const isActive = m.key === selectedMotive;
             return (
               <div
                 key={m.key}
+                role="radio"
+                aria-checked={isActive}
+                tabIndex={0}
                 onClick={() => handleMotiveChange(m.key)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleMotiveChange(m.key);
+                  }
+                }}
                 className={`motive-option-card ${isActive ? 'active' : ''}`}
               >
                 <div style={{

@@ -147,8 +147,8 @@ export const CarbonCalculator: React.FC = () => {
 
           <form onSubmit={handleLogSubmit}>
             <div className="form-group">
-              <label className="form-label">Emission Category</label>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <span id="emission-category-label" className="form-label">Emission Category</span>
+              <div role="group" aria-labelledby="emission-category-label" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 {['transportation', 'energy', 'food', 'waste', 'water'].map(cat => (
                   <button
                     key={cat}
@@ -164,8 +164,9 @@ export const CarbonCalculator: React.FC = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Sub-Category Details</label>
+              <label htmlFor="sub-category-select" className="form-label">Sub-Category Details</label>
               <select
+                id="sub-category-select"
                 className="form-control"
                 value={subCategory}
                 onChange={(e) => handleSubChange(e.target.value)}
@@ -178,13 +179,15 @@ export const CarbonCalculator: React.FC = () => {
 
             <div className="form-group">
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <label className="form-label" style={{ margin: 0 }}>Quantity Amount</label>
+                <label htmlFor="quantity-number" className="form-label" style={{ margin: 0 }}>Quantity Amount</label>
                 <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
                   {value} {SUB_OPTIONS[category].find(opt => opt.value === subCategory)?.unit}
                 </span>
               </div>
               <input
+                id="quantity-range"
                 type="range"
+                aria-label="Quantity amount range slider"
                 min={category === 'food' ? 1 : 1}
                 max={category === 'water' ? 1000 : category === 'transportation' ? 500 : 100}
                 className="form-control"
@@ -193,6 +196,7 @@ export const CarbonCalculator: React.FC = () => {
                 onChange={(e) => handleValueChange(parseFloat(e.target.value))}
               />
               <input
+                id="quantity-number"
                 type="number"
                 min="0.001"
                 step="any"

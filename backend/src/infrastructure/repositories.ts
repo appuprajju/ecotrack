@@ -41,7 +41,19 @@ export class PrismaUserRepository implements IUserRepository {
   }
 
   async listAll(): Promise<User[]> {
-    return this.prisma.user.findMany({ orderBy: { createdAt: 'desc' } });
+    return this.prisma.user.findMany({
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        country: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    }) as any;
   }
 }
 
@@ -275,7 +287,19 @@ export class PrismaAuditLogRepository implements IAuditLogRepository {
       orderBy: { createdAt: 'desc' },
       take: options?.limit ?? 50,
       skip: options?.offset ?? 0,
-      include: { user: true }
-    });
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            role: true,
+            country: true,
+            createdAt: true
+          }
+        }
+      }
+    }) as any;
   }
 }

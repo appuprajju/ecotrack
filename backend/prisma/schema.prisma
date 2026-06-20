@@ -71,6 +71,7 @@ model CarbonLog {
   @@index([userId])
   @@index([userId, category])
   @@index([loggedAt])
+  @@index([userId, loggedAt])
 }
 
 model EmissionFactor {
@@ -99,6 +100,7 @@ model Goal {
 
   @@index([userId])
   @@index([userId, status])
+  @@index([userId, endDate])
 }
 
 model Challenge {
