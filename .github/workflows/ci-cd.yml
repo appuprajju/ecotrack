@@ -86,7 +86,7 @@ jobs:
           DATABASE_URL=$(echo "$SECRETS_JSON" | jq -r '.DATABASE_URL')
           JWT_ACCESS_SECRET=$(echo "$SECRETS_JSON" | jq -r '.JWT_ACCESS_SECRET')
           JWT_REFRESH_SECRET=$(echo "$SECRETS_JSON" | jq -r '.JWT_REFRESH_SECRET')
-          
+
           # Auto-correct Supabase pooler username if it is missing the project reference
           if [[ "$DATABASE_URL" == *"pooler.supabase.com"* ]]; then
             if [[ "$DATABASE_URL" == *"//postgres:"* ]]; then
@@ -97,14 +97,45 @@ jobs:
               DATABASE_URL=$(echo "$DATABASE_URL" | sed 's/\/\/postgres\.:/\/\/postgres.jegtsqieyebkktqudide:/')
             fi
           fi
-          
+
           # Mask and print the database connection url safely for debugging
           SAFE_URL=$(echo "$DATABASE_URL" | sed -E 's/:[^@:]*@/:****@/g')
           echo "================ DB CONNECTION INFO ================"
           echo "Connecting using DATABASE_URL: $SAFE_URL"
           echo "===================================================="
-          
-          # Conditionally add Cloud SQL instances flag if host=/cloudsql/ parameter is present in URL
+
+          # ──────────────────────────────────────────────────────────────────────
+          # Step 1: Run Prisma DB push + seed as a one-off Cloud Run Job
+          # This ensures migrations complete BEFORE the new revision goes live,
+          # and does NOT block the server from binding to port 8080 on startup.
+          # ──────────────────────────────────────────────────────────────────────
+          echo "Running Prisma DB migrations via Cloud Run Job..."
+          gcloud run jobs create ecotrack-migrate \
+            --image=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ecotrack-repo/ecotrack-backend:${{ github.sha }} \
+            --region=us-central1 \
+            --set-env-vars=NODE_ENV=production,DATABASE_URL="$DATABASE_URL" \
+            --command="sh" \
+            --args="-c,npx prisma db push --accept-data-loss && node dist/prisma/seed.js" \
+            --max-retries=1 \
+            --task-timeout=300 \
+            || true  # job may already exist; use update instead
+
+          gcloud run jobs update ecotrack-migrate \
+            --image=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ecotrack-repo/ecotrack-backend:${{ github.sha }} \
+            --region=us-central1 \
+            --set-env-vars=NODE_ENV=production,DATABASE_URL="$DATABASE_URL" \
+            --command="sh" \
+            --args="-c,npx prisma db push --accept-data-loss && node dist/prisma/seed.js" \
+            --max-retries=1 \
+            --task-timeout=300 \
+            || true
+
+          gcloud run jobs execute ecotrack-migrate --region=us-central1 --wait
+          echo "DB migration job completed successfully."
+
+          # ──────────────────────────────────────────────────────────────────────
+          # Step 2: Deploy the backend server (starts immediately, no DB work)
+          # ──────────────────────────────────────────────────────────────────────
           SQL_FLAG=""
           if [[ "$DATABASE_URL" == *"host=/cloudsql/"* ]]; then
             SQL_FLAG="--add-cloudsql-instances=${{ secrets.GCP_PROJECT_ID }}:us-central1:ecotrack-db"
@@ -112,15 +143,17 @@ jobs:
           else
             echo "Direct connection (Supabase/TCP) detected. Skipping Cloud SQL proxy attachment."
           fi
-          
+
           gcloud run deploy ecotrack-backend \
             --image=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ecotrack-repo/ecotrack-backend:${{ github.sha }} \
             --region=us-central1 \
             --platform=managed \
             --allow-unauthenticated \
             --port=8080 \
+            --timeout=60 \
             $SQL_FLAG \
             --update-env-vars=NODE_ENV=production,DATABASE_URL="$DATABASE_URL",JWT_ACCESS_SECRET="$JWT_ACCESS_SECRET",JWT_REFRESH_SECRET="$JWT_REFRESH_SECRET"
+
 
       - name: Deploy Frontend to Cloud Run
         run: |

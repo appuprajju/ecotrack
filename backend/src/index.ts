@@ -44,7 +44,7 @@ app.use(globalErrorHandler);
 
 // Start Application Server
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
+  app.listen(Number(PORT), '0.0.0.0', () => {
     console.log(`===============================================`);
     console.log(`   EcoTrack AI Platform Backend Service        `);
     console.log(`   Listening on port: ${PORT}                  `);

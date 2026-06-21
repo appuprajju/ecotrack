@@ -29,11 +29,11 @@ RUN apk add --no-cache openssl
 COPY package*.json ./
 COPY prisma ./prisma/
 
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 
 COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/node_modules/.prisma ./node_modules/.prisma
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "npx prisma db push && npx prisma db seed && node dist/index.js"]
+CMD ["node", "dist/index.js"]
