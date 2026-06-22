@@ -17,11 +17,11 @@ const PORT = process.env.PORT || 8080;
 app.use(helmet());
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(',')
-  : '*';
+  ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+  : [];
 
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? allowedOrigins : '*',
+  origin: allowedOrigins.length > 0 ? allowedOrigins : '*',
   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));

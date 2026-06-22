@@ -41,7 +41,7 @@ steps:
           --region=$_GCP_REGION \
           --platform=managed \
           --allow-unauthenticated \
-          --update-env-vars=NODE_ENV=production,DATABASE_URL=$_DATABASE_URL"
+          --update-env-vars=NODE_ENV=production,DATABASE_URL=$_DATABASE_URL,JWT_ACCESS_SECRET=$_JWT_ACCESS_SECRET,JWT_REFRESH_SECRET=$_JWT_REFRESH_SECRET,REDIS_URL=$_REDIS_URL,ALLOWED_ORIGINS=$_ALLOWED_ORIGINS"
         if [ -n "$_CLOUD_SQL_INSTANCE" ]; then
           cmd="$$cmd --add-cloudsql-instances=$_CLOUD_SQL_INSTANCE"
         fi
@@ -55,6 +55,11 @@ steps:
       - '-c'
       - |
         BACKEND_URL=$$(gcloud run services describe ecotrack-backend --region=$_GCP_REGION --format="value(status.url)")
+        FRONTEND_URL=$$(gcloud run services describe ecotrack-frontend --region=$_GCP_REGION --format="value(status.url)" 2>/dev/null || echo "")
+        # Re-deploy backend with ALLOWED_ORIGINS pointing to the frontend URL
+        gcloud run services update ecotrack-backend \
+          --region=$_GCP_REGION \
+          --update-env-vars=ALLOWED_ORIGINS=$$FRONTEND_URL
         gcloud run deploy ecotrack-frontend \
           --image=$_GCP_REGION-docker.pkg.dev/$PROJECT_ID/$_REGISTRY_NAME/ecotrack-frontend:$COMMIT_SHA \
           --region=$_GCP_REGION \
@@ -72,6 +77,10 @@ substitutions:
   _REGISTRY_NAME: 'ecotrack-repo'
   _DATABASE_URL: 'postgresql://ecouser:ecopassword123!@localhost:5432/ecotrackdb'
   _CLOUD_SQL_INSTANCE: ''
+  _JWT_ACCESS_SECRET: 'eco_track_access_secret_key_987654321'
+  _JWT_REFRESH_SECRET: 'eco_track_refresh_secret_key_123456789'
+  _REDIS_URL: 'redis://localhost:6379'
+  _ALLOWED_ORIGINS: ''
 
 options:
   logging: CLOUD_LOGGING_ONLY
