@@ -41,7 +41,7 @@ steps:
           --region=$_GCP_REGION \
           --platform=managed \
           --allow-unauthenticated \
-          --update-env-vars=NODE_ENV=production,DATABASE_URL=$_DATABASE_URL,JWT_ACCESS_SECRET=$_JWT_ACCESS_SECRET,JWT_REFRESH_SECRET=$_JWT_REFRESH_SECRET,REDIS_URL=$_REDIS_URL,ALLOWED_ORIGINS=$_ALLOWED_ORIGINS"
+          --update-env-vars=NODE_ENV=production,DATABASE_URL=$_DATABASE_URL,JWT_ACCESS_SECRET=$_JWT_ACCESS_SECRET,JWT_REFRESH_SECRET=$_JWT_REFRESH_SECRET,ALLOWED_ORIGINS=$_ALLOWED_ORIGINS"
         if [ -n "$_CLOUD_SQL_INSTANCE" ]; then
           cmd="$$cmd --add-cloudsql-instances=$_CLOUD_SQL_INSTANCE"
         fi
@@ -79,7 +79,6 @@ substitutions:
   _CLOUD_SQL_INSTANCE: ''
   _JWT_ACCESS_SECRET: 'eco_track_access_secret_key_987654321'
   _JWT_REFRESH_SECRET: 'eco_track_refresh_secret_key_123456789'
-  _REDIS_URL: 'redis://localhost:6379'
   _ALLOWED_ORIGINS: ''
 
 options:
