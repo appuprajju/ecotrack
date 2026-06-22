@@ -75,7 +75,7 @@ images:
 substitutions:
   _GCP_REGION: 'us-central1'
   _REGISTRY_NAME: 'ecotrack-repo'
-  _DATABASE_URL: 'postgresql://postgres:Whitedevil%406320117@db.jegtsqieyebkktqudide.supabase.co:5432/postgres'
+  _DATABASE_URL: 'postgresql://postgres:Whitedevil%406320117@db.jegtsqieyebkktqudide.supabase.co:5432/postgres?pgbouncer=true&connection_limit=1'
   _CLOUD_SQL_INSTANCE: ''
   _JWT_ACCESS_SECRET: 'eco_track_access_secret_key_987654321'
   _JWT_REFRESH_SECRET: 'eco_track_refresh_secret_key_123456789'
