@@ -80,15 +80,15 @@ export const ChallengesPortal: React.FC = () => {
 
   return (
     <div className="animate-fade-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+      <div className="challenges-header">
         <div>
           <h1>Eco Challenges</h1>
           <p>Commit to clean living goals, reduce real-world emissions, and gain eco credits.</p>
         </div>
         
         {/* Points Display Badge */}
-        <div className="glass-card" style={{ padding: '12px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', border: '1px solid var(--primary)' }}>
-          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>ECO CREDIT BALANCES</span>
+        <div className="glass-card" style={{ padding: '12px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', border: '1px solid var(--primary)', flexShrink: 0 }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>ECO CREDITS</span>
           <span style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--primary)' }}>{pointsTotal} pts</span>
         </div>
       </div>

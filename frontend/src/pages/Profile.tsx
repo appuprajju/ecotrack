@@ -19,6 +19,13 @@ export const UserProfile: React.FC = () => {
   const [highestCategory, setHighestCategory] = useState<string>('general');
   const [selectedMotive, setSelectedMotive] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Define the motivational profiles with premium SVG icons
   const motives: Motive[] = [
@@ -192,7 +199,7 @@ export const UserProfile: React.FC = () => {
 
       <div className="grid-3" style={{ marginBottom: '32px' }}>
         {/* Profile Details Card */}
-        <div className="glass-card" style={{ gridColumn: 'span 1' }}>
+        <div className="glass-card" style={{ gridColumn: isMobile ? '1 / -1' : 'span 1' }}>
           <h3>Personal Details</h3>
           <p style={{ fontSize: '0.8rem', marginBottom: '24px' }}>Secure credentials database records</p>
           
@@ -225,7 +232,7 @@ export const UserProfile: React.FC = () => {
         </div>
 
         {/* Selected Project Motive Card */}
-        <div className="glass-card" style={{ gridColumn: 'span 2' }}>
+        <div className="glass-card" style={{ gridColumn: isMobile ? '1 / -1' : 'span 2' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
             <div>
               <h3>Active Project Motive</h3>

@@ -16,6 +16,13 @@ export const CarbonCalculator: React.FC = () => {
   const { token } = useAuth();
   const [logs, setLogs] = useState<Log[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
   // Input form state
   const [category, setCategory] = useState<string>('transportation');
@@ -155,7 +162,7 @@ export const CarbonCalculator: React.FC = () => {
                     type="button"
                     onClick={() => setCategory(cat)}
                     className={`btn ${category === cat ? 'btn-primary' : 'btn-secondary'}`}
-                    style={{ flex: 1, textTransform: 'capitalize', padding: '10px', fontSize: '0.85rem' }}
+                    style={{ flex: '1 1 auto', minWidth: isMobile ? 'calc(50% - 8px)' : 'auto', textTransform: 'capitalize', padding: '8px 10px', fontSize: '0.8rem' }}
                   >
                     {cat}
                   </button>
@@ -214,7 +221,7 @@ export const CarbonCalculator: React.FC = () => {
         </div>
 
         {/* Real-time Math Preview Card */}
-        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center', border: '1px dashed var(--primary)' }}>
+        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center', border: '1px dashed var(--primary)', minHeight: isMobile ? 'auto' : '300px' }}>
           <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Environmental Impact Estimate</span>
           
           <div style={{ fontSize: '4.5rem', fontWeight: 800, color: 'var(--primary)', textShadow: '0 0 15px var(--primary-glow)', margin: '15px 0' }}>

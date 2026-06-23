@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ApiService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
+
 interface Goal {
   id: string;
   title: string;
@@ -21,6 +22,13 @@ export const GoalsTracker: React.FC = () => {
   const { token } = useAuth();
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
   // Create Goal State
   const [title, setTitle] = useState<string>('');
@@ -98,7 +106,7 @@ export const GoalsTracker: React.FC = () => {
 
       <div className="grid-3" style={{ alignItems: 'start', marginBottom: '40px' }}>
         {/* Set New Goal Card */}
-        <div className="glass-card" style={{ gridColumn: 'span 1' }}>
+        <div className="glass-card" style={{ gridColumn: isMobile ? '1 / -1' : 'span 1' }}>
           <h2>Set Sustainability Target</h2>
           
           {error && (
@@ -187,7 +195,7 @@ export const GoalsTracker: React.FC = () => {
         </div>
 
         {/* Goals List Panel */}
-        <div className="glass-card" style={{ gridColumn: 'span 2' }}>
+        <div className="glass-card" style={{ gridColumn: isMobile ? '1 / -1' : 'span 2' }}>
           <h2>Current Goal Tracks</h2>
           <p style={{ fontSize: '0.85rem', marginBottom: '20px' }}>Active goals query the AI Engine to calculate completion odds.</p>
 
@@ -201,24 +209,25 @@ export const GoalsTracker: React.FC = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {goals.map((g) => (
                 <div key={g.id} className="glass-card" style={{ padding: '20px', borderLeft: `4px solid ${g.status === 'ACTIVE' ? 'var(--accent)' : g.status === 'COMPLETED' ? 'var(--success)' : 'var(--danger)'}` }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-                    <div>
-                      <h3 style={{ margin: 0, fontSize: '1.2rem' }}>{g.title}</h3>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px', gap: '8px', flexWrap: 'wrap' }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{g.title}</h3>
                       <span className="badge-tag badge-transportation" style={{ marginTop: '4px', textTransform: 'capitalize' }}>
-                        Category: {g.category}
+                        {g.category}
                       </span>
                     </div>
                     <span className="badge-tag" style={{
                       backgroundColor: g.status === 'ACTIVE' ? 'rgba(99, 102, 241, 0.1)' : g.status === 'COMPLETED' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                      color: g.status === 'ACTIVE' ? 'var(--accent)' : g.status === 'COMPLETED' ? 'var(--success)' : 'var(--danger)'
+                      color: g.status === 'ACTIVE' ? 'var(--accent)' : g.status === 'COMPLETED' ? 'var(--success)' : 'var(--danger)',
+                      flexShrink: 0
                     }}>
                       {g.status}
                     </span>
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px', fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>
                     <span>Limit: <strong>{g.targetCo2Kg} kg CO₂</strong></span>
-                    <span>Period: {new Date(g.startDate).toLocaleDateString()} to {new Date(g.endDate).toLocaleDateString()}</span>
+                    <span style={{ fontSize: '0.8rem' }}>📅 {new Date(g.startDate).toLocaleDateString()} → {new Date(g.endDate).toLocaleDateString()}</span>
                   </div>
 
                   {/* AI success model indicator */}
